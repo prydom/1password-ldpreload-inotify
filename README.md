@@ -3,7 +3,7 @@
 ## Background
 
 1Password has a thread/async loop which listens for inotify messages on a number of files, including its own executable.
-It calls inotify_add_watch for the `1password` binary with the mask `0xfce` which is `(IN_MODIFY | IN_ATTRIB | IN_CLOSE_WRITE | IN_MOVE | IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF)`. If this inotify event triggers, 1Password will exit. This is to prevent incorrect JavaScript code from being loaded when the application is updated.
+It calls inotify_add_watch for the `1password` binary with the mask `0xfce` which is `(IN_MODIFY | IN_ATTRIB | IN_CLOSE_WRITE | IN_MOVE | IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF)`. If this inotify event triggers, 1Password will exit. This is to prevent incorrect JavaScript code from being loaded when the application is updated (see https://1password.community/discussion/138445/application-exits-on-rpm-ostree-update).
 
 On a `rpm-ostree` deployment, RPM packages which deploy to `/opt` are actually deployed to `/usr/lib/opt` and a symlink is created in `/var/opt`. The files in `/usr/lib/opt` are immutable because `/usr` is usually mounted read-only. However, on `btrfs` — and likely other filesystems — a read-only mount does not prevent updates to the inode, particularly updates to the link count which is updated when hard links are created (this also resets the ctime). Since `ostree` checks out objects as hard links (similar to git), whenever a new commit is created with duplicate files the link count of `/opt/1Password/1password` can change and cause the program to quit. In practice, 1Password quits whenever `rpm-ostree` is called to upgrade or change packages.
 
