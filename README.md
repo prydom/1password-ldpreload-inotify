@@ -13,20 +13,21 @@ From the background, we know that changes to the file attributes — particularl
 
 We do this by creating a shared object file which when loaded into the binary with `LD_PRELOAD` or `patchelf` will hook `inotify_add_watch()`.
 
-## Build
+## Build and run
 
-```
-gcc -Wall -fPIC -shared -o 1p-ldpreload.so 1p-ldpreload.c -ldl
-```
-
-## Run
-
-```
+```sh
+# Build the shared object
+make
+# copy the shared object to /opt/1Password/
+sudo make install
+# Run/test the injection
 LD_PRELOAD=$PWD/1p-ldpreload.so /opt/1Password/1password
+# If it works, make the injection permanent
+patchelf --add-needed '1p-ldpreload.so' /opt/1Password/1password
 ```
 
 ## Packaging
 
-I'm looking into putting this into an RPM file that can be added to the rpm-ostree overlay and will automatically use `patchelf` to patch the 1password binary.
+The `1password-ostree-workaround.spec` file can be used to build a RPM file for this project. Use `rpmbuild` or `fedpkg` to build it.
 
-I will add the RPM spec file here once this is complete.
+The package **should only be used** on `rpm-ostree` based installations because I didn't add a `%triggerin` macro to track upgrades of 1Password. `rpm-ostree` runs all overlay `%post` scripts on all transactions, so the `%triggerin` scriptlet isn't needed.
