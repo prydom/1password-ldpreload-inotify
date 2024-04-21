@@ -29,5 +29,3 @@ patchelf --add-needed '1p-ldpreload.so' /opt/1Password/1password
 ## Packaging
 
 The `1password-ostree-workaround.spec` file can be used to build a RPM file for this project. Use `rpmbuild` or `fedpkg` to build it.
-
-The package **should only be used** on `rpm-ostree` based installations because I didn't add a `%triggerin` macro to track upgrades of 1Password. `rpm-ostree` runs all overlay `%post` scripts on all transactions, so the `%triggerin` scriptlet isn't needed.
